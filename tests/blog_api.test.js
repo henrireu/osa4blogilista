@@ -102,6 +102,38 @@ test('if title or url not added ', async () => {
   
 })
 
+test('delete blog', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+  
+  const blogsAtEnd = await helper.blogsInDb()
+
+  console.log("blogien määrä alussa:", blogsAtStart.length, " blogien määrä lopussa", blogsAtEnd.length)
+
+  assert.strictEqual(blogsAtStart.length, blogsAtEnd.length + 1)
+})
+
+test('edit blog', async () => {
+  const blogs = await helper.blogsInDb()
+  const blogToEdit = blogs[0]
+
+  const newBlog = {
+    title: "tosi hieno blogi",
+    author: "kirjoittajaa",
+    url: "kirjoittaja.fii",
+    likes: 55
+  }
+
+  await api.put(`/api/blogs/${blogToEdit.id}`).send(newBlog)
+  
+  const blogsAtEnd = await helper.blogsInDb()
+
+  assert.strictEqual("tosi hieno blogi", blogsAtEnd[0].title)
+})
 
 after(async () => {
   await mongoose.connection.close()
